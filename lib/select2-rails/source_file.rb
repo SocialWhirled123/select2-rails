@@ -12,9 +12,13 @@ class SourceFile < Thor
     self.destination_root = "app/assets"
     remote = "https://github.com/ivaynberg/select2"
     get "#{remote}/raw/#{tag}/select2.png", "images/select2.png"
+    get "#{remote}/raw/#{tag}/select2x2.png", "images/select2x2.png"
     get "#{remote}/raw/#{tag}/select2-spinner.gif", "images/select2-spinner.gif"
     get "#{remote}/raw/#{tag}/select2.css", "stylesheets/select2.css"
     get "#{remote}/raw/#{tag}/select2.js", "javascripts/select2.js"
+    languages.each do |lang|
+      get "#{remote}/raw/#{tag}/select2_locale_#{lang}.js", "javascripts/select2_locale_#{lang}.js"
+    end
   end
 
   desc "convert css to scss file", "convert css to scss file"
@@ -24,6 +28,7 @@ class SourceFile < Thor
       run("cp stylesheets/select2.css stylesheets/select2.css.scss")
       gsub_file 'stylesheets/select2.css.scss', '(select2-spinner.gif)', "('select2-spinner.gif')"
       gsub_file 'stylesheets/select2.css.scss', '(select2.png)', "('select2.png')"
+      gsub_file 'stylesheets/select2.css.scss', '(select2x2.png)', "('select2x2.png')"
       gsub_file 'stylesheets/select2.css.scss', ' url', ' image-url'
     end
   end
@@ -37,7 +42,13 @@ class SourceFile < Thor
   def fetch_tags
     http = HTTPClient.new
     response = JSON.parse(http.get("https://api.github.com/repos/ivaynberg/select2/tags").body)
-    response.map{|tag| tag["name"]}.sort
+    response.map{|tag| tag["name"]}.sort    
+  end
+  def languages
+    [ "ar", "bg", "ca", "cs", "da", "de", "el", "es", "et", "eu", "fa", "fi", "fr", "gl", "he", "hr", 
+      "hu", "id", "is", "it", "ja", "ko", "lt", "lv", "mk", "nl", "no", "pl", "pt-BR", 
+      "pt-PT", "ro", "ru", "sk", "sv", "th", "tr", "ua", "vi", "zh-CN", "zh-TW"
+    ].sort   
   end
   def select msg, elements
     elements.each_with_index do |element, index|
